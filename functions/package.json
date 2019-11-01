@@ -14,7 +14,7 @@
     "@crapougnax/positive-common": "^0.3.7",
     "firebase-admin": "~7",
     "firebase-functions": "^2",
-    "lodash": "^4.17.11"
+    "lodash": "^4.17.13"
   },
   "devDependencies": {
     "tslint": "^5",
