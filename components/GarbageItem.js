@@ -48,7 +48,6 @@ export const garbageTypes = [
 
 export default class GarbageItem extends React.Component {
 
-
   delete = (uid) => {
     console.log(uid)
     Alert.alert(

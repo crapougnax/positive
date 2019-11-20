@@ -1,12 +1,13 @@
 import React from 'react'
-import { Alert, View, Text, DatePickerIOS, StyleSheet, Dimensions } from 'react-native'
+import { Alert, View, Text, DatePickerIOS, StyleSheet, Dimensions, TouchableOpacity } from 'react-native'
 import { Input } from 'react-native-elements'
 import { Button, Card, CardSection } from './common'
 import { garbageTypes, getWeekNumber } from '@crapougnax/positive-common'
 import RNPickerSelect from 'react-native-picker-select'
 import firebase from 'firebase'
 import _ from 'lodash'
-import { Camera, Permissions } from 'expo'
+import { Camera } from 'expo-camera'
+import * as Permissions from 'expo-permissions'
 
 export default class GarbageForm extends React.Component {
 
@@ -17,14 +18,12 @@ export default class GarbageForm extends React.Component {
       weight: null,
       date: new Date(),
       hasCameraPermission: null,
+      type: Camera.Constants.Type.back,
   }
 
   async componentDidMount() {
     const camera = await Permissions.askAsync(Permissions.CAMERA)
-    //const audio = await Permissions.askAsync(Permissions.AUDIO_RECORDING)
-    const hasCameraPermission = (camera.status === 'granted')
-
-    this.setState({ hasCameraPermission })
+    this.setState({ hasCameraPermission: camera.status === 'granted' })
   }
 
   onButtonPress = () => {
@@ -104,15 +103,36 @@ export default class GarbageForm extends React.Component {
               />
               </View>
             </CardSection>
-              <Text>Photo</Text>
+              {/* <Text>Photo</Text>
                 <View style={{flex: 1, justifyContent: 'center'}}>
                 { hasCameraPermission &&
-                    <Camera
-                      style={styles.preview}
-                      ref={camera => this.camera = camera}
-                    />
+                  <Camera style={styles.preview} type={this.state.type}>
+                    <View
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'transparent',
+                        flexDirection: 'row',
+                      }}>
+                      <TouchableOpacity
+                        style={{
+                          flex: 0.1,
+                          alignSelf: 'flex-end',
+                          alignItems: 'center',
+                        }}
+                        onPress={() => {
+                          this.setState({
+                            type:
+                              this.state.type === Camera.Constants.Type.back
+                                ? Camera.Constants.Type.front
+                                : Camera.Constants.Type.back,
+                          });
+                        }}>
+                        <Text style={{ fontSize: 18, marginBottom: 10, color: 'white' }}> Flip </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </Camera>
                 }
-              </View>
+              </View> */}
             <CardSection>
               <Button onPress={this.onButtonPress.bind(this)}>
                 Enregistrer
@@ -162,5 +182,6 @@ const pickerSelectStyles = StyleSheet.create({
     top: 0,
     right: 0,
     bottom: 0,
-},
+    flex: 1,
+  },
 })

@@ -3,13 +3,13 @@
     "name": "Positive",
     "slug": "positive",
     "privacy": "public",
-    "sdkVersion": "32.0.0",
+    "sdkVersion": "34.0.0",
     "platforms": [
       "ios",
       "android"
     ],
-    "version": "0.4.4",
-    "orientation": "portrait",
+    "version": "0.4.5",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "splash": {
       "image": "./assets/images/splash.png",

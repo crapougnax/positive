@@ -2,20 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const _ = require("lodash");
 const positive_common_1 = require("@crapougnax/positive-common");
 admin.initializeApp(functions.config().firebase);
 exports.calcWeeklyStats = functions
-    .runWith({ memory: "128MB", timeoutSeconds: 15 })
     .region("europe-west1")
-    .database.ref('/garbages/{userId}/{garbageId}')
+    .firestore.document('/garbages/{userId}/{garbageId}')
     .onWrite((change, context) => {
     console.log(`Garbage ${context.params.garbageId} has been edited`);
     // Ignore all changes not related to the weight property
-    if (change.before.exists() && change.after.exists() && change.before.val().weight === change.after.val().weight) {
+    if (change.before && change.after
+        && change.before.data().weight === change.after.data().weight) {
         return null;
     }
-    const data = change.after.val() || change.before.val();
+    const data = change.after.data() || change.before.data();
     const stats = {
         _computed: (new Date()).toISOString(),
         types: {},
@@ -24,16 +23,14 @@ exports.calcWeeklyStats = functions
             grams: 0,
         },
     };
-    _.map(positive_common_1.garbageTypes, item => {
-        stats.types[item.value] = 0;
-    });
+    positive_common_1.garbageTypes.map(item => stats.types[item.value] = 0);
     // Call all data for same week
-    admin.database()
-        .ref(`/garbages/${context.params.userId}/`)
-        .orderByChild('week').equalTo(data.week)
-        .on('value', snapshot => {
+    admin.firestore().collection(`/garbages/${context.params.userId}/`)
+        .where('week', '==', data.week).get()
+        .then(dataset => {
         // sum up by types
-        _.map(snapshot.val(), item => {
+        dataset.forEach(doc => {
+            const item = doc.data();
             stats.types[item.type] += parseInt(item.weight);
             stats.total.records++;
             stats.total.grams += parseInt(item.weight);
@@ -43,7 +40,8 @@ exports.calcWeeklyStats = functions
         }
         // create or replace weekly stats
         const ref = `/stats/${context.params.userId}/${data.date.substring(0, 4)}W${data.week}`;
-        return admin.database().ref(ref).set(stats);
-    });
+        return admin.firestore().doc(ref).set(stats);
+    })
+        .catch(err => err);
 });
 //# sourceMappingURL=index.js.map
